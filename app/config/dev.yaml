@@ -1,0 +1,9 @@
+debug: true
+
+db:
+  addr: localhost:5432
+  name: chad-integration
+  user: root
+  pass: root
+
+
