@@ -2,17 +2,16 @@ package main
 
 import (
 	"chadgpt-api/app"
-	"chadgpt-api/app/httputils"
 	"chadgpt-api/cmd/migrations"
-	"chadgpt-api/resources/handlers"
-	"chadgpt-api/resources/models"
+	"chadgpt-api/httputils"
+	"chadgpt-api/resources"
 	"fmt"
+	"github.com/uptrace/bun/dbfixture"
 	"github.com/uptrace/bun/migrate"
 	"github.com/urfave/cli/v2"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -49,7 +48,8 @@ var serverCommand = &cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		ctx, appInstance, err := app.Start(c.Context, "resources", c.String("env"))
+		resources.Init()
+		ctx, appInstance, err := app.Start(c.Context, "api", c.String("env"))
 		if err != nil {
 			return err
 		}
@@ -66,12 +66,6 @@ var serverCommand = &cli.Command{
 			IdleTimeout:  60 * time.Second,
 			Handler:      handler,
 		}
-
-		api := appInstance.ApiRouter()
-		userHandler := handlers.NewUserHandler(appInstance)
-
-		api.GET("/users", userHandler.List)
-		api.GET("/users/:id", userHandler.Get)
 
 		go func() {
 			if err := srv.ListenAndServe(); err != nil && !isServerClosed(err) {
@@ -115,31 +109,10 @@ func newDBCommand(migrations *migrate.Migrations) *cli.Command {
 					}
 					defer appInstance.Stop()
 
-					return appInstance.Database().ResetModel(ctx,
-						(*models.User)(nil),
-					)
-				},
-			},
-			{
-				Name:  "create_go",
-				Usage: "create Go migration",
-				Action: func(c *cli.Context) error {
-					ctx, appInstance, err := app.StartCLI(c)
-					if err != nil {
-						return err
-					}
-					defer appInstance.Stop()
-
-					migrator := migrate.NewMigrator(appInstance.Database(), migrations)
-
-					name := strings.Join(c.Args().Slice(), "_")
-					mf, err := migrator.CreateGoMigration(ctx, name)
-					if err != nil {
-						return err
-					}
-					fmt.Printf("created migration %s (%s)\n", mf.Name, mf.Path)
-
-					return nil
+					db := appInstance.Database()
+					db.RegisterModel(ctx, (*app.User)(nil))
+					fixture := dbfixture.New(db, dbfixture.WithRecreateTables())
+					return fixture.Load(ctx, app.FS(), "db/fixture.yml")
 				},
 			},
 		},

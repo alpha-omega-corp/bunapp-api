@@ -11,15 +11,15 @@ import (
 var (
 	errEOF      = BadRequest("eof", "EOF reading HTTP request body")
 	ErrNotFound = NotFound("not found")
-	ErrInternal = New(http.StatusInternalServerError, "internal", "internal server error")
+	ErrInternal = NewError(http.StatusInternalServerError, "internal", "internal server error")
 )
 
 func NotFound(msg string, args ...interface{}) Error {
-	return New(http.StatusNotFound, "not_found", msg, args...)
+	return NewError(http.StatusNotFound, "not_found", msg, args...)
 }
 
 func BadRequest(code, msg string, args ...interface{}) Error {
-	return New(http.StatusBadRequest, code, msg, args...)
+	return NewError(http.StatusBadRequest, code, msg, args...)
 }
 
 //------------------------------------------------------------------------------
@@ -30,7 +30,7 @@ type Error struct {
 	Message string `json:"message"`
 }
 
-func New(status int, code, msg string, args ...interface{}) Error {
+func NewError(status int, code, msg string, args ...interface{}) Error {
 	if len(args) > 0 {
 		msg = fmt.Sprintf(msg, args...)
 	}
@@ -63,7 +63,7 @@ func From(err error, debug bool) Error {
 	}
 
 	if debug {
-		return New(http.StatusInternalServerError, "internal", err.Error())
+		return NewError(http.StatusInternalServerError, "internal", err.Error())
 	}
 	return ErrInternal
 }

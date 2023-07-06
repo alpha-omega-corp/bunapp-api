@@ -1,0 +1,7 @@
+- model: User
+  rows:
+
+    - first_name: Luca
+      last_name: Prudente
+      age: 24
+      email: feldrin@alphomega.org

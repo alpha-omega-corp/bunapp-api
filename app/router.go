@@ -1,11 +1,10 @@
 package app
 
 import (
-	"chadgpt-api/app/httputils"
+	"chadgpt-api/httputils"
 	"github.com/uptrace/bunrouter"
 	"github.com/uptrace/bunrouter/extra/bunrouterotel"
 	"github.com/uptrace/bunrouter/extra/reqlog"
-
 	"net/http"
 )
 
@@ -15,10 +14,12 @@ func (app *App) initRouter() {
 		bunrouter.WithMiddleware(reqlog.NewMiddleware(
 			reqlog.WithEnabled(app.IsDebug()),
 			reqlog.WithVerbose(true),
+			reqlog.FromEnv(""),
 		)))
 
 	app.apiRouter = app.router.NewGroup("/api",
 		bunrouter.WithMiddleware(corsMiddleware),
+		bunrouter.WithMiddleware(app.authHandler),
 		bunrouter.WithMiddleware(app.errorHandler),
 	)
 }
@@ -40,6 +41,23 @@ func (app *App) errorHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
 	}
 }
 
+func (app *App) authHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
+	return func(w http.ResponseWriter, req bunrouter.Request) error {
+		if (req.Route() == "/api/login" || req.Route() == "/api/users") && req.Method == "POST" {
+			return next(w, req)
+		}
+
+		tokenString := req.Header.Get("x-jwt-token")
+		token, err := ValidateJwt(tokenString)
+		if err != nil || !token.Valid {
+			w.WriteHeader(http.StatusUnauthorized)
+			return httputils.From(err, app.IsDebug())
+		} else {
+			return next(w, req)
+		}
+	}
+}
+
 func corsMiddleware(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
 	return func(w http.ResponseWriter, req bunrouter.Request) error {
 		origin := req.Header.Get("Origin")
@@ -52,7 +70,7 @@ func corsMiddleware(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
 		h.Set("Access-Control-Allow-Origin", origin)
 		h.Set("Access-Control-Allow-Credentials", "true")
 
-		// CORS preflight.
+		// CORS.
 		if req.Method == http.MethodOptions {
 			h.Set("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,HEAD")
 			h.Set("Access-Control-Allow-Headers", "authorization,content-type")
