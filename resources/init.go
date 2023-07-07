@@ -12,10 +12,13 @@ func Init() {
 		userHandler := handlers.NewUserHandler(app)
 
 		api.POST("/login", userHandler.Login)
-
 		api.POST("/users", userHandler.Create)
-		api.GET("/users", userHandler.List)
-		api.GET("/users/:id", userHandler.Get)
+
+		api.GET("/users", app.AuthHandler(userHandler.List))
+		api.GET("/users/:id", app.AuthClaimHandler(userHandler.Get))
+
+		planHandler := handlers.NewPlanHandler(app)
+		api.POST("/plans", app.AuthHandler(planHandler.Create))
 
 		return nil
 	})

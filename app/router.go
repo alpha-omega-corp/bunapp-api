@@ -2,6 +2,7 @@ package app
 
 import (
 	"chadgpt-api/httputils"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bunrouter"
 	"github.com/uptrace/bunrouter/extra/bunrouterotel"
 	"github.com/uptrace/bunrouter/extra/reqlog"
@@ -19,7 +20,6 @@ func (app *App) initRouter() {
 
 	app.apiRouter = app.router.NewGroup("/api",
 		bunrouter.WithMiddleware(corsMiddleware),
-		bunrouter.WithMiddleware(app.authHandler),
 		bunrouter.WithMiddleware(app.errorHandler),
 	)
 }
@@ -41,20 +41,43 @@ func (app *App) errorHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
 	}
 }
 
-func (app *App) authHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
+func (app *App) AuthHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
 	return func(w http.ResponseWriter, req bunrouter.Request) error {
-		if (req.Route() == "/api/login" || req.Route() == "/api/users") && req.Method == "POST" {
-			return next(w, req)
-		}
-
 		tokenString := req.Header.Get("x-jwt-token")
 		token, err := ValidateJwt(tokenString)
 		if err != nil || !token.Valid {
 			w.WriteHeader(http.StatusUnauthorized)
 			return httputils.From(err, app.IsDebug())
-		} else {
-			return next(w, req)
 		}
+
+		return next(w, req)
+	}
+}
+
+func (app *App) AuthClaimHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
+	return func(w http.ResponseWriter, req bunrouter.Request) error {
+		tokenString := req.Header.Get("x-jwt-token")
+		token, err := ValidateJwt(tokenString)
+		if err != nil || !token.Valid {
+			w.WriteHeader(http.StatusUnauthorized)
+			return httputils.From(err, app.IsDebug())
+		}
+
+		claims := token.Claims.(jwt.MapClaims)
+		ctx := req.Context()
+		id := req.Param("id")
+
+		var user User
+		if err := app.Database().NewSelect().Where("id = ?", id).Model(&user).Scan(ctx); err != nil {
+			return err
+		}
+
+		if user.Email != claims["email"].(string) {
+			w.WriteHeader(http.StatusUnauthorized)
+			return httputils.ErrForbidden
+		}
+
+		return next(w, req)
 	}
 }
 
