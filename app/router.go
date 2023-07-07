@@ -2,7 +2,6 @@ package app
 
 import (
 	"chadgpt-api/httputils"
-	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bunrouter"
 	"github.com/uptrace/bunrouter/extra/bunrouterotel"
@@ -61,14 +60,13 @@ func (app *App) AuthClaimHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFu
 		token, err := ValidateJwt(tokenString)
 		if err != nil || !token.Valid {
 			w.WriteHeader(http.StatusUnauthorized)
-			return next(w, req)
+			return httputils.From(err, app.IsDebug())
 		}
 
 		claims := token.Claims.(jwt.MapClaims)
 		ctx := req.Context()
 		id := req.Param("id")
 
-		fmt.Println("id", id)
 		var user User
 		if err := app.Database().NewSelect().Where("id = ?", id).Model(&user).Scan(ctx); err != nil {
 			return err

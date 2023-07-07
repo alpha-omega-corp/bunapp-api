@@ -37,6 +37,7 @@ type App struct {
 
 	router    *bunrouter.Router
 	apiRouter *bunrouter.Group
+	gptClient *GptClient
 
 	// lazy init
 	dbOnce sync.Once
@@ -50,6 +51,7 @@ func New(ctx context.Context, c *Config) *App {
 	}
 	app.ctx = ContextWithApp(ctx, app)
 	app.initRouter()
+	app.initClient()
 	return app
 }
 
@@ -114,6 +116,10 @@ func (app *App) Router() *bunrouter.Router {
 
 func (app *App) ApiRouter() *bunrouter.Group {
 	return app.apiRouter
+}
+
+func (app *App) GptClient() *GptClient {
+	return app.gptClient
 }
 
 func (app *App) Database() *bun.DB {

@@ -17,6 +17,9 @@ func Init() {
 		api.GET("/users", app.AuthHandler(userHandler.List))
 		api.GET("/users/:id", app.AuthClaimHandler(userHandler.Get))
 
+		planHandler := handlers.NewPlanHandler(app)
+		api.POST("/plans", app.AuthHandler(planHandler.Create))
+
 		return nil
 	})
 }

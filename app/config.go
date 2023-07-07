@@ -39,6 +39,11 @@ type Config struct {
 		USER string `yaml:"user"`
 		PASS string `yaml:"pass"`
 	} `yaml:"db"`
+
+	GPT struct {
+		HOST   string `yaml:"host"`
+		BEARER string `yaml:"bearer"`
+	}
 }
 
 func ReadConfig(fileSys fs.FS, service, env string) (*Config, error) {

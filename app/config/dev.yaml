@@ -6,4 +6,7 @@ db:
   user: root
   pass: root
 
+gpt:
+  host: https://api.openai.com/v1
+  key:
 

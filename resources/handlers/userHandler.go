@@ -32,6 +32,14 @@ type CreateUserRequest struct {
 	Password  string `json:"password"`
 }
 
+type UserResponse struct {
+	Id        int64  `json:"id"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Age       int    `json:"age"`
+	Email     string `json:"email"`
+}
+
 func NewUserHandler(app *app.App) *UserHandler {
 	return &UserHandler{
 		app: app,
@@ -115,7 +123,5 @@ func (h *UserHandler) List(w http.ResponseWriter, req bunrouter.Request) error {
 		return err
 	}
 
-	return bunrouter.JSON(w, bunrouter.H{
-		"users": users,
-	})
+	return bunrouter.JSON(w, users)
 }
