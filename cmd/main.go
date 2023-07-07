@@ -2,7 +2,6 @@ package main
 
 import (
 	"chadgpt-api/app"
-	"chadgpt-api/cmd/migrations"
 	"chadgpt-api/httputils"
 	"chadgpt-api/resources"
 	"fmt"
@@ -28,7 +27,7 @@ func main() {
 		},
 		Commands: []*cli.Command{
 			serverCommand,
-			newDBCommand(migrations.Migrations),
+			newDBCommand(migrate.NewMigrations()),
 		},
 	}
 

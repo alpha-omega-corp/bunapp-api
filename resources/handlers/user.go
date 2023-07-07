@@ -103,7 +103,6 @@ func (h *UserHandler) Get(w http.ResponseWriter, req bunrouter.Request) error {
 	if err := h.app.Database().NewSelect().Where("id = ?", id).Model(&user).Scan(ctx); err != nil {
 		return err
 	}
-	// TODO: JWT Claims
 
 	return bunrouter.JSON(w, user)
 }

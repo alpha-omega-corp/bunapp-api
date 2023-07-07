@@ -9,13 +9,18 @@ import (
 )
 
 var (
-	errEOF      = BadRequest("eof", "EOF reading HTTP request body")
-	ErrNotFound = NotFound("not found")
-	ErrInternal = NewError(http.StatusInternalServerError, "internal", "internal server error")
+	errEOF       = BadRequest("eof", "EOF reading HTTP request body")
+	ErrNotFound  = NotFound("not found")
+	ErrInternal  = NewError(http.StatusInternalServerError, "internal", "internal server error")
+	ErrForbidden = Forbidden("unauthorized")
 )
 
 func NotFound(msg string, args ...interface{}) Error {
 	return NewError(http.StatusNotFound, "not_found", msg, args...)
+}
+
+func Forbidden(msg string, args ...interface{}) Error {
+	return NewError(http.StatusForbidden, "forbidden", msg, args...)
 }
 
 func BadRequest(code, msg string, args ...interface{}) Error {
