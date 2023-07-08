@@ -1,19 +1,14 @@
 run:
 	go run cmd/main.go -env=dev serve
 
-init-migrations:
+db_create:
+	cd storage/docker/ && docker-compose up -d
+
+db_init:
 	go run cmd/main.go -env=dev db init
 
-run-migrations:
+db_migrate:
 	go run cmd/main.go -env=dev db migrate
 
-create-migration:
-	go run cmd/main.go -env=dev db create_go $(name)
-
-
-
-test:
-	go test -v ./...
-
 build:
-	go build -o bin/api
+	go build -o bin/api cmd/main.go

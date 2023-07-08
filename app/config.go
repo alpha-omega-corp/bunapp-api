@@ -42,7 +42,7 @@ type Config struct {
 
 	GPT struct {
 		HOST   string `yaml:"host"`
-		BEARER string `yaml:"bearer"`
+		BEARER string `yaml:"token"`
 	}
 }
 

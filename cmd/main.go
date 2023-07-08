@@ -27,7 +27,7 @@ func main() {
 		},
 		Commands: []*cli.Command{
 			serverCommand,
-			newDBCommand(migrate.NewMigrations()),
+			newDBCommand(),
 		},
 	}
 
@@ -79,7 +79,7 @@ var serverCommand = &cli.Command{
 	},
 }
 
-func newDBCommand(migrations *migrate.Migrations) *cli.Command {
+func newDBCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "db",
 		Usage: "manage database migrations",
@@ -94,7 +94,7 @@ func newDBCommand(migrations *migrate.Migrations) *cli.Command {
 					}
 					defer appInstance.Stop()
 
-					migrator := migrate.NewMigrator(appInstance.Database(), migrations)
+					migrator := migrate.NewMigrator(appInstance.Database(), migrate.NewMigrations())
 					return migrator.Init(ctx)
 				},
 			},

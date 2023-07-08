@@ -2,11 +2,11 @@ debug: true
 
 db:
   addr: localhost:5432
-  name: chad-integration
+  name: chad_integration
   user: root
   pass: root
 
 gpt:
   host: https://api.openai.com/v1
-  key:
+  token:
 
