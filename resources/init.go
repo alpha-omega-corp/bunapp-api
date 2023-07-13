@@ -11,11 +11,10 @@ func Init() {
 		api := app.ApiRouter()
 		userHandler := handlers.NewUserHandler(app)
 
-		api.POST("/login", userHandler.Login)
-		api.POST("/users", userHandler.Create)
+		api.GET("/user", app.UserFromToken)
 
-		api.GET("/users", app.AuthHandler(userHandler.List))
-		api.GET("/users/:id", app.AuthClaimHandler(userHandler.Get))
+		api.POST("/login", userHandler.Login)
+		api.POST("/register", userHandler.Register)
 
 		planHandler := handlers.NewPlanHandler(app)
 		api.POST("/plans", app.AuthHandler(planHandler.Create))

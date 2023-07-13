@@ -1,6 +1,9 @@
 package app
 
 import (
+	"chadgpt-api/types"
+	"context"
+	"database/sql"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bun"
@@ -29,7 +32,21 @@ type User struct {
 	Email             string `bun:"email,unique"`
 	Age               int    `bun:"age"`
 	EncryptedPassword string `bun:"encrypted_password"`
-	AccountNumber     int64  `bun:"account_number"`
+}
+
+func (app *App) NewUser(ctx context.Context, data *types.CreateUserRequest) (sql.Result, error) {
+	encPw, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	return app.Database().NewInsert().Model(&User{
+		FirstName:         data.FirstName,
+		LastName:          data.LastName,
+		Age:               data.Age,
+		Email:             data.Email,
+		EncryptedPassword: string(encPw),
+	}).Exec(ctx)
 }
 
 func (u *User) IsValid(pw string) bool {
@@ -45,4 +62,14 @@ func (u *User) CreateJwt() (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(secret))
+}
+
+func (u *User) ToResponse() types.UserResponse {
+	return types.UserResponse{
+		Id:        u.ID,
+		FirstName: u.FirstName,
+		LastName:  u.LastName,
+		Age:       u.Age,
+		Email:     u.Email,
+	}
 }

@@ -5,7 +5,6 @@ import (
 	"chadgpt-api/httputils"
 	"chadgpt-api/resources"
 	"fmt"
-	"github.com/uptrace/bun/dbfixture"
 	"github.com/uptrace/bun/migrate"
 	"github.com/urfave/cli/v2"
 	"log"
@@ -42,7 +41,7 @@ var serverCommand = &cli.Command{
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "addr",
-			Value: "localhost:8000",
+			Value: "localhost:8001",
 			Usage: "serve address",
 		},
 	},
@@ -109,9 +108,8 @@ func newDBCommand() *cli.Command {
 					defer appInstance.Stop()
 
 					db := appInstance.Database()
-					db.RegisterModel(ctx, (*app.User)(nil))
-					fixture := dbfixture.New(db, dbfixture.WithRecreateTables())
-					return fixture.Load(ctx, app.FS(), "db/fixture.yml")
+					return db.ResetModel(ctx, (*app.User)(nil))
+
 				},
 			},
 		},

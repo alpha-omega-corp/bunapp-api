@@ -2,11 +2,10 @@ package handlers
 
 import (
 	"chadgpt-api/app"
+	"chadgpt-api/types"
 	"encoding/json"
 	"fmt"
 	"github.com/uptrace/bunrouter"
-	"golang.org/x/crypto/bcrypt"
-	"math/rand"
 	"net/http"
 )
 
@@ -20,24 +19,8 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Id    int64  `json:"id"`
-	Token string `json:"token"`
-}
-
-type CreateUserRequest struct {
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Age       int    `json:"age"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-}
-
-type UserResponse struct {
-	Id        int64  `json:"id"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Age       int    `json:"age"`
-	Email     string `json:"email"`
+	User  types.UserResponse `json:"user"`
+	Token string             `json:"token"`
 }
 
 func NewUserHandler(app *app.App) *UserHandler {
@@ -67,40 +50,25 @@ func (h *UserHandler) Login(w http.ResponseWriter, req bunrouter.Request) error 
 	}
 
 	res := LoginResponse{
-		Id:    user.ID,
+		User:  user.ToResponse(),
 		Token: token,
 	}
 
 	return bunrouter.JSON(w, res)
 }
 
-func (h *UserHandler) Create(w http.ResponseWriter, req bunrouter.Request) error {
-	data := new(CreateUserRequest)
+func (h *UserHandler) Register(w http.ResponseWriter, req bunrouter.Request) error {
+	data := new(types.CreateUserRequest)
 	if err := json.NewDecoder(req.Body).Decode(data); err != nil {
 		return err
 	}
 
-	encPw, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
+	user, err := h.app.NewUser(req.Context(), data)
 	if err != nil {
 		return err
 	}
 
-	res, err := h.app.Database().NewInsert().Model(&app.User{
-		FirstName:         data.FirstName,
-		LastName:          data.LastName,
-		Age:               data.Age,
-		Email:             data.Email,
-		EncryptedPassword: string(encPw),
-		AccountNumber:     int64(rand.Intn(1000000)),
-	}).Exec(req.Context())
-
-	if err != nil {
-		return err
-	}
-
-	return bunrouter.JSON(w, bunrouter.H{
-		"id": res,
-	})
+	return bunrouter.JSON(w, user)
 }
 
 func (h *UserHandler) Get(w http.ResponseWriter, req bunrouter.Request) error {
