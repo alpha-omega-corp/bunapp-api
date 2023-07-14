@@ -2,70 +2,128 @@ package app
 
 import (
 	"bytes"
+	"chadgpt-api/types"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 )
 
+type ClientOptions struct {
+	host  string
+	token string
+}
+
 type GptClient struct {
-	client *http.Client
-	token  string
-	host   string
+	client   *http.Client
+	cContext *types.CompletionContext
+	options  *ClientOptions
 }
 
-type CompletionMessageRequest struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+type RoundTripper struct {
+	next   http.RoundTripper
+	logger io.Writer
 }
 
-type CompletionRequest struct {
-	Model    string                     `json:"model"`
-	Messages []CompletionMessageRequest `json:"messages"`
+func (rt *RoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	_, err := fmt.Fprintf(rt.logger, "[%s] %s %s\n", time.Now().Format(time.ANSIC), req.Method, req.URL.String())
+	if err != nil {
+		return nil, err
+	}
+	return rt.next.RoundTrip(req)
 }
 
 func (app *App) initClient() {
-	tr := &http.Transport{
-		MaxIdleConns:       10,
-		IdleConnTimeout:    30 * time.Second,
-		DisableCompression: true,
+	c := &http.Client{
+		Transport: &RoundTripper{
+			next:   http.DefaultTransport,
+			logger: os.Stdout,
+		},
+		Timeout: 10 * time.Second,
 	}
 
 	app.gptClient = &GptClient{
-		client: &http.Client{Transport: tr},
-		token:  app.config.GPT.BEARER,
-		host:   app.config.GPT.HOST,
+		client: c,
+		cContext: &types.CompletionContext{
+			Model:    "gpt-3.5-turbo",
+			Messages: []types.CompletionMessage{},
+		},
+		options: &ClientOptions{
+			token: app.config.GPT.TOKEN,
+			host:  app.config.GPT.HOST,
+		},
 	}
 }
 
-func (g *GptClient) Request(path string) (*http.Response, error) {
-	CompletionMessageRequest := []CompletionMessageRequest{
-		{
-			Role:    "Chad",
-			Content: "I want to lose weight",
-		},
-		{
-			Role:    "Chad",
-			Content: "I want to lose weight",
-		},
-	}
+func (gpt *GptClient) UserReq(prompt string) ([]types.CompletionMessage, error) {
+	return gpt.request(types.CompletionMessage{
+		Role:    "user",
+		Content: prompt,
+	})
+}
 
-	unbufferedBody := &CompletionRequest{
-		Model:    "gpt-3.5",
-		Messages: CompletionMessageRequest,
-	}
+func (gpt *GptClient) SysReq(prompt string) ([]types.CompletionMessage, error) {
+	return gpt.request(types.CompletionMessage{
+		Role:    "system",
+		Content: prompt,
+	})
+}
 
-	var body bytes.Buffer
-	err := json.NewEncoder(&body).Encode(unbufferedBody)
-
-	req, err := http.NewRequest("POST", g.host+path, &body)
+func (gpt *GptClient) request(m types.CompletionMessage) ([]types.CompletionMessage, error) {
+	gpt.cContext.Messages = append(gpt.cContext.Messages, m)
+	req, err := http.NewRequest(http.MethodPost, gpt.reqUrl(), gpt.ctxReader())
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := g.client.Do(req)
+	gpt.setToken(req)
+
+	res, err := gpt.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 
-	return res, err
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(res.Body)
+
+	var completionRes types.CompletionResponse
+	cErr := json.Unmarshal(body, &completionRes)
+	if cErr != nil {
+		return nil, cErr
+	}
+
+	gpt.cContext.Messages = append(gpt.cContext.Messages, completionRes.Choices[0].Message)
+	fmt.Println(gpt.cContext.Messages)
+	return gpt.cContext.Messages, nil
+}
+
+func (gpt *GptClient) ctxReader() *bytes.Reader {
+	marshalled, err := json.Marshal(gpt.cContext)
+	if err != nil {
+		panic(err)
+	}
+
+	return bytes.NewReader(marshalled)
+}
+
+func (gpt *GptClient) setToken(req *http.Request) {
+	bearer := []string{"Bearer", gpt.options.token}
+	req.Header.Set("Authorization", strings.Join(bearer, " "))
+	req.Header.Set("Content-Type", "application/json")
+}
+
+func (gpt *GptClient) reqUrl() string {
+	return gpt.options.host + "/chat/completions"
 }

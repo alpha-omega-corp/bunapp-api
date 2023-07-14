@@ -8,5 +8,5 @@ db:
 
 gpt:
   host: https://api.openai.com/v1
-  key:
+  token:
 
