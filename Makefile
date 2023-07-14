@@ -11,4 +11,4 @@ db_migrate:
 	go run cmd/main.go -env=dev db migrate
 
 build:
-	go build -o bin/api cmd/main.go
+	go build -o storage/bin/api cmd/main.go
