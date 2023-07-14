@@ -42,6 +42,25 @@ func (app *App) errorHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
 	}
 }
 
+func (app *App) UserFromToken(w http.ResponseWriter, req bunrouter.Request) error {
+	tokenString := req.Header.Get("x-jwt-token")
+	token, err := ValidateJwt(tokenString)
+	if err != nil || !token.Valid {
+		w.WriteHeader(http.StatusUnauthorized)
+		return httputils.From(err, app.IsDebug())
+	}
+
+	claims := token.Claims.(jwt.MapClaims)
+	ctx := req.Context()
+
+	var user User
+	if err := app.Database().NewSelect().Where("email = ?", claims["email"].(string)).Model(&user).Scan(ctx); err != nil {
+		return err
+	}
+
+	return bunrouter.JSON(w, user.ToResponse())
+}
+
 func (app *App) AuthHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
 	return func(w http.ResponseWriter, req bunrouter.Request) error {
 		tokenString := req.Header.Get("x-jwt-token")
@@ -61,14 +80,13 @@ func (app *App) AuthClaimHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFu
 		token, err := ValidateJwt(tokenString)
 		if err != nil || !token.Valid {
 			w.WriteHeader(http.StatusUnauthorized)
-			return next(w, req)
+			return httputils.From(err, app.IsDebug())
 		}
 
 		claims := token.Claims.(jwt.MapClaims)
 		ctx := req.Context()
 		id := req.Param("id")
 
-		fmt.Println("id", id)
 		var user User
 		if err := app.Database().NewSelect().Where("id = ?", id).Model(&user).Scan(ctx); err != nil {
 			return err
@@ -86,22 +104,14 @@ func (app *App) AuthClaimHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFu
 func corsMiddleware(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
 	return func(w http.ResponseWriter, req bunrouter.Request) error {
 		origin := req.Header.Get("Origin")
-		if origin == "" {
-			return next(w, req)
-		}
-
+		fmt.Print(origin)
 		h := w.Header()
 
 		h.Set("Access-Control-Allow-Origin", origin)
 		h.Set("Access-Control-Allow-Credentials", "true")
-
-		// CORS.
-		if req.Method == http.MethodOptions {
-			h.Set("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,HEAD")
-			h.Set("Access-Control-Allow-Headers", "authorization,content-type")
-			h.Set("Access-Control-Max-Age", "86400")
-			return nil
-		}
+		h.Set("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,HEAD")
+		h.Set("Access-Control-Allow-Headers", "authorization,content-type")
+		h.Set("Access-Control-Max-Age", "86400")
 
 		return next(w, req)
 	}

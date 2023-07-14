@@ -1,0 +1,12 @@
+debug: true
+
+db:
+  addr: localhost:5432
+  name: chad-integration
+  user:
+  pass:
+
+gpt:
+  host: https://api.openai.com/v1
+  token:
+
