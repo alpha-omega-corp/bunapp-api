@@ -6,8 +6,8 @@ import (
 	"context"
 )
 
-func Init() {
-	app.OnStart("resources.init", func(ctx context.Context, app *app.App) error {
+func BootControllers() {
+	app.OnStart("controller.init", func(ctx context.Context, app *app.App) error {
 		api := app.ApiRouter()
 		userHandler := handlers.NewUserHandler(app)
 

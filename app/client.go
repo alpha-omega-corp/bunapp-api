@@ -42,7 +42,7 @@ func (app *App) initClient() {
 			next:   http.DefaultTransport,
 			logger: os.Stdout,
 		},
-		Timeout: 10 * time.Second,
+		Timeout: 100 * time.Second,
 	}
 
 	app.gptClient = &GptClient{
@@ -58,23 +58,19 @@ func (app *App) initClient() {
 	}
 }
 
-func (gpt *GptClient) UserReq(prompt string) ([]types.CompletionMessage, error) {
-	return gpt.request(types.CompletionMessage{
+func (gpt *GptClient) UserRequest(prompt string) ([]types.CompletionMessage, error) {
+	message := types.CompletionMessage{
 		Role:    "user",
 		Content: prompt,
-	})
-}
+	}
 
-func (gpt *GptClient) SysReq(prompt string) ([]types.CompletionMessage, error) {
-	return gpt.request(types.CompletionMessage{
-		Role:    "system",
-		Content: prompt,
-	})
+	return gpt.request(message)
 }
 
 func (gpt *GptClient) request(m types.CompletionMessage) ([]types.CompletionMessage, error) {
 	gpt.cContext.Messages = append(gpt.cContext.Messages, m)
-	req, err := http.NewRequest(http.MethodPost, gpt.reqUrl(), gpt.ctxReader())
+
+	req, err := http.NewRequest(http.MethodPost, gpt.reqUrl(), gpt.completionBody())
 	if err != nil {
 		return nil, err
 	}
@@ -105,11 +101,10 @@ func (gpt *GptClient) request(m types.CompletionMessage) ([]types.CompletionMess
 	}
 
 	gpt.cContext.Messages = append(gpt.cContext.Messages, completionRes.Choices[0].Message)
-	fmt.Println(gpt.cContext.Messages)
 	return gpt.cContext.Messages, nil
 }
 
-func (gpt *GptClient) ctxReader() *bytes.Reader {
+func (gpt *GptClient) completionBody() *bytes.Reader {
 	marshalled, err := json.Marshal(gpt.cContext)
 	if err != nil {
 		panic(err)

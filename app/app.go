@@ -35,9 +35,10 @@ type App struct {
 	onStop      appHooks
 	onAfterStop appHooks
 
-	router    *bunrouter.Router
-	apiRouter *bunrouter.Group
-	gptClient *GptClient
+	router        *bunrouter.Router
+	apiRouter     *bunrouter.Group
+	gptClient     *GptClient
+	promptManager *PromptManager
 
 	// lazy init
 	dbOnce sync.Once
@@ -52,6 +53,8 @@ func New(ctx context.Context, c *Config) *App {
 	app.ctx = ContextWithApp(ctx, app)
 	app.initRouter()
 	app.initClient()
+	app.initTemplate()
+
 	return app
 }
 
@@ -120,6 +123,10 @@ func (app *App) ApiRouter() *bunrouter.Group {
 
 func (app *App) GptClient() *GptClient {
 	return app.gptClient
+}
+
+func (app *App) PromptManager() *PromptManager {
+	return app.promptManager
 }
 
 func (app *App) Database() *bun.DB {

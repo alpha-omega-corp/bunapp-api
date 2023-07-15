@@ -46,8 +46,9 @@ var serverCommand = &cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		resources.Init()
+		resources.BootControllers()
 		ctx, appInstance, err := app.Start(c.Context, "api", c.String("env"))
+
 		if err != nil {
 			return err
 		}
