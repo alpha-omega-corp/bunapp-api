@@ -11,6 +11,17 @@ import (
 	"os"
 )
 
+type User struct {
+	bun.BaseModel `bun:"table:users,alias:u"`
+
+	ID                int64  `bun:"id,pk,autoincrement"`
+	FirstName         string `bun:"first_name"`
+	LastName          string `bun:"last_name"`
+	Email             string `bun:"email,unique"`
+	Age               int    `bun:"age"`
+	EncryptedPassword string `bun:"encrypted_password"`
+}
+
 func ValidateJwt(tokenString string) (*jwt.Token, error) {
 	secret := os.Getenv("JWT_SECRET")
 
@@ -21,17 +32,6 @@ func ValidateJwt(tokenString string) (*jwt.Token, error) {
 
 		return []byte(secret), nil
 	})
-}
-
-type User struct {
-	bun.BaseModel `bun:"table:users,alias:u"`
-
-	ID                int64  `bun:"id,pk,autoincrement"`
-	FirstName         string `bun:"first_name"`
-	LastName          string `bun:"last_name"`
-	Email             string `bun:"email,unique"`
-	Age               int    `bun:"age"`
-	EncryptedPassword string `bun:"encrypted_password"`
 }
 
 func (app *App) NewUser(ctx context.Context, data *types.CreateUserRequest) (sql.Result, error) {

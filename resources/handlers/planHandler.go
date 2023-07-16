@@ -2,6 +2,9 @@ package handlers
 
 import (
 	"chadgpt-api/app"
+	"chadgpt-api/types"
+	"encoding/json"
+	"fmt"
 	"github.com/uptrace/bunrouter"
 	"net/http"
 )
@@ -21,22 +24,16 @@ func NewPlanHandler(app *app.App) *PlanHandler {
 }
 
 func (h *PlanHandler) Create(w http.ResponseWriter, req bunrouter.Request) error {
+	var data types.CreatePlanRequest
+	if err := json.NewDecoder(req.Body).Decode(&data); err != nil {
+		return err
+	}
+
 	client := h.app.GptClient()
 	promptManager := h.app.PromptManager()
 
-	prompt, err := promptManager.Execute("head.prompt", struct {
-		Diet       string
-		Allergies  []string
-		Conditions []string
-		Goal       string
-		Bmi        float64
-	}{
-		Diet:       "Keto",
-		Allergies:  []string{"Peanuts", "Shellfish"},
-		Conditions: []string{"Diabetes", "High Blood Pressure"},
-		Goal:       "Lose Weight",
-		Bmi:        25.0,
-	})
+	fmt.Println(data)
+	prompt, err := promptManager.Execute("head.prompt", data)
 	if err != nil {
 		return err
 	}
