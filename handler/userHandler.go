@@ -1,7 +1,8 @@
-package handlers
+package handler
 
 import (
 	"chadgpt-api/app"
+	"chadgpt-api/repository"
 	"chadgpt-api/types"
 	"encoding/json"
 	"fmt"
@@ -10,37 +11,29 @@ import (
 )
 
 type UserHandler struct {
-	app *app.App
-}
-
-type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type LoginResponse struct {
-	User  types.UserResponse `json:"user"`
-	Token string             `json:"token"`
+	app        *app.App
+	repository *repository.UserRepository
 }
 
 func NewUserHandler(app *app.App) *UserHandler {
 	return &UserHandler{
-		app: app,
+		app:        app,
+		repository: repository.NewUserRepository(app.Database()),
 	}
 }
 
 func (h *UserHandler) Login(w http.ResponseWriter, req bunrouter.Request) error {
-	var data LoginRequest
+	var data types.LoginRequest
 	if err := json.NewDecoder(req.Body).Decode(&data); err != nil {
 		return err
 	}
 
-	user := new(app.User)
-	if err := h.app.Database().NewSelect().Where("email = ?", data.Email).Model(user).Scan(h.app.Context()); err != nil {
+	user, err := h.repository.GetUserByEmail(data.Email, req.Context())
+	if err != nil {
 		return err
 	}
 
-	if !user.IsValid(data.Password) {
+	if !user.MatchPassword(data.Password) {
 		return fmt.Errorf("authentication failed for user %s", data.Email)
 	}
 
@@ -49,7 +42,7 @@ func (h *UserHandler) Login(w http.ResponseWriter, req bunrouter.Request) error 
 		return err
 	}
 
-	res := LoginResponse{
+	res := types.LoginResponse{
 		User:  user.ToResponse(),
 		Token: token,
 	}

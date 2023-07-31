@@ -49,7 +49,7 @@ func (app *App) NewUser(ctx context.Context, data *types.CreateUserRequest) (sql
 	}).Exec(ctx)
 }
 
-func (u *User) IsValid(pw string) bool {
+func (u *User) MatchPassword(pw string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(u.EncryptedPassword), []byte(pw)) == nil
 }
 

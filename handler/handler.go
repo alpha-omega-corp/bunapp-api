@@ -1,22 +1,21 @@
-package resources
+package handler
 
 import (
 	"chadgpt-api/app"
-	"chadgpt-api/resources/handlers"
 	"context"
 )
 
-func BootControllers() {
-	app.OnStart("controller.init", func(ctx context.Context, app *app.App) error {
+func Init() {
+	app.OnStart("handler.init", func(ctx context.Context, app *app.App) error {
 		api := app.ApiRouter()
-		userHandler := handlers.NewUserHandler(app)
+		userHandler := NewUserHandler(app)
 
 		api.GET("/user", app.UserFromToken)
 
 		api.POST("/login", userHandler.Login)
 		api.POST("/register", userHandler.Register)
 
-		planHandler := handlers.NewPlanHandler(app)
+		planHandler := NewPlanHandler(app)
 		api.POST("/plans", app.AuthHandler(planHandler.Create))
 
 		return nil

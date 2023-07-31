@@ -2,8 +2,8 @@ package main
 
 import (
 	"chadgpt-api/app"
+	"chadgpt-api/handler"
 	"chadgpt-api/httputils"
-	"chadgpt-api/resources"
 	"fmt"
 	"github.com/uptrace/bun/migrate"
 	"github.com/urfave/cli/v2"
@@ -46,7 +46,7 @@ var serverCommand = &cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		resources.BootControllers()
+		handler.Init()
 		ctx, appInstance, err := app.Start(c.Context, "api", c.String("env"))
 
 		if err != nil {

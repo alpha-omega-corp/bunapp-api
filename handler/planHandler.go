@@ -1,10 +1,9 @@
-package handlers
+package handler
 
 import (
 	"chadgpt-api/app"
 	"chadgpt-api/types"
 	"encoding/json"
-	"fmt"
 	"github.com/uptrace/bunrouter"
 	"net/http"
 )
@@ -32,7 +31,6 @@ func (h *PlanHandler) Create(w http.ResponseWriter, req bunrouter.Request) error
 	client := h.app.GptClient()
 	promptManager := h.app.PromptManager()
 
-	fmt.Println(data)
 	prompt, err := promptManager.Execute("head.prompt", data)
 	if err != nil {
 		return err

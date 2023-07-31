@@ -15,3 +15,13 @@ type UserResponse struct {
 	Age       int    `json:"age"`
 	Email     string `json:"email"`
 }
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type LoginResponse struct {
+	User  UserResponse `json:"user"`
+	Token string       `json:"token"`
+}
