@@ -4,6 +4,7 @@ import (
 	"chadgpt-api/app"
 	"chadgpt-api/handler"
 	"chadgpt-api/httputils"
+	"chadgpt-api/types"
 	"fmt"
 	"github.com/uptrace/bun/migrate"
 	"github.com/urfave/cli/v2"
@@ -46,7 +47,7 @@ var serverCommand = &cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		handler.Init()
+		handler.Bootstrap()
 		ctx, appInstance, err := app.Start(c.Context, "api", c.String("env"))
 
 		if err != nil {
@@ -109,7 +110,7 @@ func newDBCommand() *cli.Command {
 					defer appInstance.Stop()
 
 					db := appInstance.Database()
-					return db.ResetModel(ctx, (*app.User)(nil))
+					return db.ResetModel(ctx, (*types.UserRaw)(nil))
 
 				},
 			},

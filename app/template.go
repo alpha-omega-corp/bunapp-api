@@ -5,10 +5,6 @@ import (
 	"text/template"
 )
 
-type PromptManager struct {
-	template *template.Template
-}
-
 func (app *App) initTemplate() {
 	tmpl, err := template.ParseFS(FS(), "templates/*.prompt")
 	if err != nil {
@@ -16,6 +12,10 @@ func (app *App) initTemplate() {
 	}
 
 	app.promptManager = &PromptManager{tmpl}
+}
+
+type PromptManager struct {
+	template *template.Template
 }
 
 func (pm *PromptManager) Execute(name string, data interface{}) (string, error) {

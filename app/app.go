@@ -43,6 +43,8 @@ type App struct {
 	// lazy init
 	dbOnce sync.Once
 	db     *bun.DB
+
+	repoManager *RepoManager
 }
 
 func New(ctx context.Context, c *Config) *App {
@@ -54,6 +56,7 @@ func New(ctx context.Context, c *Config) *App {
 	app.initRouter()
 	app.initClient()
 	app.initTemplate()
+	app.initRepositories()
 
 	return app
 }
@@ -71,7 +74,7 @@ func Start(ctx context.Context, service, envName string) (context.Context, *App,
 }
 
 func StartConfig(ctx context.Context, cfg *Config) (context.Context, *App, error) {
-	rand.Seed(time.Now().UnixNano())
+	rand.NewSource(time.Now().UnixNano())
 
 	app := New(ctx, cfg)
 	if err := onStart.Run(ctx, app); err != nil {
@@ -121,6 +124,10 @@ func (app *App) ApiRouter() *bunrouter.Group {
 	return app.apiRouter
 }
 
+func (app *App) Repositories() *RepoManager {
+	return app.repoManager
+}
+
 func (app *App) GptClient() *GptClient {
 	return app.gptClient
 }
@@ -130,7 +137,6 @@ func (app *App) PromptManager() *PromptManager {
 }
 
 func (app *App) Database() *bun.DB {
-
 	app.dbOnce.Do(func() {
 		dbConf := app.config.DB
 		driverOptions := pgdriver.NewConnector(

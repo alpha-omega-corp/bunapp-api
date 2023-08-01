@@ -1,4 +1,2 @@
 .idea
-public
-.env
-app/config/dev.yaml
+./app/config/dev.yaml

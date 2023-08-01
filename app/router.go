@@ -8,6 +8,11 @@ import (
 	"github.com/uptrace/bunrouter/extra/bunrouterotel"
 	"github.com/uptrace/bunrouter/extra/reqlog"
 	"net/http"
+	"strconv"
+)
+
+var (
+	tokenHeader = "x-jwt-token"
 )
 
 func (app *App) initRouter() {
@@ -25,6 +30,42 @@ func (app *App) initRouter() {
 	)
 }
 
+func (app *App) AuthHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
+	return func(w http.ResponseWriter, req bunrouter.Request) error {
+		_, err := GetValidTokenFromReq(w, req)
+		if err != nil {
+			return err
+		}
+
+		return next(w, req)
+	}
+}
+
+func (app *App) AuthClaimHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
+	return func(w http.ResponseWriter, req bunrouter.Request) error {
+		token, err := GetValidTokenFromReq(w, req)
+		if err != nil {
+			return err
+		}
+
+		parseInt, err := strconv.ParseInt(req.Param("id"), 10, 64)
+		if err != nil {
+			return err
+		}
+
+		user, err := app.Repositories().User().GetById(parseInt, req.Context())
+		if err != nil {
+			return err
+		}
+
+		if err := user.Claims(token.Claims.(jwt.MapClaims)); err != nil {
+			return err
+		}
+
+		return next(w, req)
+	}
+}
+
 func (app *App) errorHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
 	return func(w http.ResponseWriter, req bunrouter.Request) error {
 		err := next(w, req)
@@ -39,65 +80,6 @@ func (app *App) errorHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
 		_ = bunrouter.JSON(w, httpErr)
 
 		return err
-	}
-}
-
-func (app *App) UserFromToken(w http.ResponseWriter, req bunrouter.Request) error {
-	tokenString := req.Header.Get("x-jwt-token")
-	token, err := ValidateJwt(tokenString)
-	if err != nil || !token.Valid {
-		w.WriteHeader(http.StatusUnauthorized)
-		return httputils.From(err, app.IsDebug())
-	}
-
-	claims := token.Claims.(jwt.MapClaims)
-	ctx := req.Context()
-
-	var user User
-	if err := app.Database().NewSelect().Where("email = ?", claims["email"].(string)).Model(&user).Scan(ctx); err != nil {
-		return err
-	}
-
-	return bunrouter.JSON(w, user.ToResponse())
-}
-
-func (app *App) AuthHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
-	return func(w http.ResponseWriter, req bunrouter.Request) error {
-		tokenString := req.Header.Get("x-jwt-token")
-		token, err := ValidateJwt(tokenString)
-		if err != nil || !token.Valid {
-			w.WriteHeader(http.StatusUnauthorized)
-			return httputils.From(err, app.IsDebug())
-		}
-
-		return next(w, req)
-	}
-}
-
-func (app *App) AuthClaimHandler(next bunrouter.HandlerFunc) bunrouter.HandlerFunc {
-	return func(w http.ResponseWriter, req bunrouter.Request) error {
-		tokenString := req.Header.Get("x-jwt-token")
-		token, err := ValidateJwt(tokenString)
-		if err != nil || !token.Valid {
-			w.WriteHeader(http.StatusUnauthorized)
-			return httputils.From(err, app.IsDebug())
-		}
-
-		claims := token.Claims.(jwt.MapClaims)
-		ctx := req.Context()
-		id := req.Param("id")
-
-		var user User
-		if err := app.Database().NewSelect().Where("id = ?", id).Model(&user).Scan(ctx); err != nil {
-			return err
-		}
-
-		if user.Email != claims["email"].(string) {
-			w.WriteHeader(http.StatusUnauthorized)
-			return httputils.ErrForbidden
-		}
-
-		return next(w, req)
 	}
 }
 

@@ -64,12 +64,12 @@ func (h appHook) run(ctx context.Context, app *App) error {
 	const timeout = 30 * time.Second
 
 	done := make(chan struct{})
-	errc := make(chan error)
+	errChan := make(chan error)
 
 	go func() {
 		start := time.Now()
 		if err := h.fn(ctx, app); err != nil {
-			errc <- err
+			errChan <- err
 			return
 		}
 		if d := time.Since(start); d > time.Second {
@@ -81,7 +81,7 @@ func (h appHook) run(ctx context.Context, app *App) error {
 	select {
 	case <-done:
 		return nil
-	case err := <-errc:
+	case err := <-errChan:
 		return err
 	case <-time.After(timeout):
 		return fmt.Errorf("hook=%q timed out after %s", h.name, timeout)

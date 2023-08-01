@@ -2,7 +2,7 @@ debug: true
 
 db:
   addr: localhost:5432
-  name: chad-integration
+  name:
   user:
   pass:
 

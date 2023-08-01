@@ -5,15 +5,15 @@ import (
 	"context"
 )
 
-func Init() {
+func Bootstrap() {
 	app.OnStart("handler.init", func(ctx context.Context, app *app.App) error {
 		api := app.ApiRouter()
 		userHandler := NewUserHandler(app)
 
-		api.GET("/user", app.UserFromToken)
-
 		api.POST("/login", userHandler.Login)
 		api.POST("/register", userHandler.Register)
+
+		api.GET("/user", userHandler.UserFromToken)
 
 		planHandler := NewPlanHandler(app)
 		api.POST("/plans", app.AuthHandler(planHandler.Create))
