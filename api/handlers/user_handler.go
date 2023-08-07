@@ -25,30 +25,19 @@ func NewUserHandler(app *app.App) *UserHandler {
 	}
 }
 
-func (h *UserHandler) Login(w http.ResponseWriter, req bunrouter.Request) error {
-	data := new(types.LoginRequest)
-	if err := json.NewDecoder(req.Body).Decode(data); err != nil {
-		return err
-	}
-
-	user, err := h.repository.GetByEmail(data.Email, req.Context())
+func (h *UserHandler) Validate(w http.ResponseWriter, req bunrouter.Request) error {
+	token, err := app.GetValidTokenFromReq(w, req)
 	if err != nil {
 		return err
 	}
 
-	if !user.Verify(data.Password) {
-		return fmt.Errorf("authentication failed for user %s", data.Email)
-	}
-
-	token, err := user.CreateToken()
+	claims := token.Claims.(jwt.MapClaims)
+	user, err := h.repository.GetByEmail(claims["email"].(string), req.Context())
 	if err != nil {
 		return err
 	}
 
-	return bunrouter.JSON(w, types.LoginResponse{
-		User:  user,
-		Token: token,
-	})
+	return bunrouter.JSON(w, user)
 }
 
 func (h *UserHandler) Register(w http.ResponseWriter, req bunrouter.Request) error {
@@ -78,6 +67,32 @@ func (h *UserHandler) Register(w http.ResponseWriter, req bunrouter.Request) err
 	return bunrouter.JSON(w, user)
 }
 
+func (h *UserHandler) Login(w http.ResponseWriter, req bunrouter.Request) error {
+	data := new(types.LoginRequest)
+	if err := json.NewDecoder(req.Body).Decode(data); err != nil {
+		return err
+	}
+
+	user, err := h.repository.GetByEmail(data.Email, req.Context())
+	if err != nil {
+		return err
+	}
+
+	if !user.Verify(data.Password) {
+		return fmt.Errorf("authentication failed for user %s", data.Email)
+	}
+
+	token, err := user.CreateToken()
+	if err != nil {
+		return err
+	}
+
+	return bunrouter.JSON(w, types.LoginResponse{
+		User:  user,
+		Token: token,
+	})
+}
+
 func (h *UserHandler) Get(w http.ResponseWriter, req bunrouter.Request) error {
 	parseInt, err := strconv.ParseInt(req.Param("id"), 10, 64)
 	if err != nil {
@@ -101,17 +116,6 @@ func (h *UserHandler) List(w http.ResponseWriter, req bunrouter.Request) error {
 	return bunrouter.JSON(w, users)
 }
 
-func (h *UserHandler) Validate(w http.ResponseWriter, req bunrouter.Request) error {
-	token, err := app.GetValidTokenFromReq(w, req)
-	if err != nil {
-		return err
-	}
-
-	claims := token.Claims.(jwt.MapClaims)
-	user, err := h.repository.GetByEmail(claims["email"].(string), req.Context())
-	if err != nil {
-		return err
-	}
-
-	return bunrouter.JSON(w, user)
+func (h *UserHandler) Create(w http.ResponseWriter, req bunrouter.Request) error {
+	return nil
 }
