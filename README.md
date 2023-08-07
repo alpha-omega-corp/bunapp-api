@@ -95,7 +95,7 @@ The `app` directory contains the code responsible for creating an `app *App` ins
 2. Inside it create a file named `init.go` with the following content:
 
 ```go
-package httphandlers
+package example
 
 import (
   "context"
@@ -103,7 +103,7 @@ import (
 )
 
 func Bootstrap() {
-  app.OnStart("httphandlers.init", func (ctx context.Context, app *app.App) error {
+  app.OnStart("example.init", func (ctx context.Context, app *app.App) error {
     //app.Router()
     //app.ApiRouter()
     //app.Database()
@@ -113,7 +113,7 @@ func Bootstrap() {
   })
 }
 ```
-<u>**Example**</u>: [httphandlers](https://github.com/alpha-omega-corp/bunapp-api/blob/production/httphandlers/init.go)
+<u>**Example**</u>: [api-app](https://github.com/alpha-omega-corp/bunapp-api/blob/production/api/init.go)
 
 The `callback` function allows you to access [`app *App`](https://github.com/alpha-omega-corp/bunapp-api/blob/production/app/app.go)'s context, properties and handlers.
 
@@ -121,18 +121,15 @@ To start this new `httphandlers` application call the public `Bootstrap` functio
 
 ```golang
 package main
-
-import (
-  "github.com/alpha-omega-corp/bunapp-api/app"
-  "github.com/alpha-omega-corp/bunapp-api/httphandlers"
-)
-
+//...
 func main() {
-    //...
-    Action: func(c *cli.Context) error {
-        httphandlers.Bootstrap()
-    } //...
+	//...
+    Action:
+        func(c *cli.Context) error {
+            httphandlers.Bootstrap()
+        } //...
 }
+
 ```
 <u>**Example**</u>: [cmd/main.go](https://github.com/alpha-omega-corp/bunapp-api/blob/production/cmd/main.go)
 

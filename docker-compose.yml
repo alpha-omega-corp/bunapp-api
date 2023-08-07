@@ -1,16 +1,16 @@
-version: '3'
+version: '2'
 
 services:
-  bunapp-api-db:
+  bunapp-db:
     image: docker.io/bitnami/postgresql:15
     ports:
-      - '5439:5439'
+      - '5432:5432'
     volumes:
       - 'pgdata:/bitnami/postgresql'
     environment:
       - 'POSTGRESQL_USERNAME=root'
       - 'POSTGRESQL_PASSWORD=root'
-      - 'POSTGRESQL_DATABASE=bunapp-api-db'
+      - 'POSTGRESQL_DATABASE=bunapp'
 
 volumes:
   pgdata:

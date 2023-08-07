@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/alpha-omega-corp/bunapp-api/api"
+	"github.com/alpha-omega-corp/bunapp-api/api/types"
 	"github.com/alpha-omega-corp/bunapp-api/app"
-	"github.com/alpha-omega-corp/bunapp-api/httphandlers"
-	"github.com/alpha-omega-corp/bunapp-api/httputils"
-	"github.com/alpha-omega-corp/bunapp-api/types"
+	"github.com/alpha-omega-corp/bunapp-api/app/httputils"
 	"github.com/uptrace/bun/migrate"
 	"github.com/urfave/cli/v2"
 	"log"
@@ -51,7 +51,7 @@ var serverCommand = &cli.Command{
 			Name:  "start",
 			Usage: "start the http server",
 			Action: func(c *cli.Context) error {
-				httphandlers.Bootstrap()
+				api.Bootstrap()
 				ctx, appInstance, err := app.Start(c.Context, "bunapp-api", c.String("env"))
 
 				if err != nil {

@@ -1,11 +1,11 @@
-package httphandlers
+package handlers
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/alpha-omega-corp/bunapp-api/api/repositories"
+	"github.com/alpha-omega-corp/bunapp-api/api/types"
 	"github.com/alpha-omega-corp/bunapp-api/app"
-	"github.com/alpha-omega-corp/bunapp-api/repository"
-	"github.com/alpha-omega-corp/bunapp-api/types"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bunrouter"
 	"golang.org/x/crypto/bcrypt"
@@ -15,7 +15,7 @@ import (
 
 type UserHandler struct {
 	app        *app.App
-	repository repository.IUserRepository
+	repository repositories.IUserRepository
 }
 
 func NewUserHandler(app *app.App) *UserHandler {
@@ -101,7 +101,7 @@ func (h *UserHandler) List(w http.ResponseWriter, req bunrouter.Request) error {
 	return bunrouter.JSON(w, users)
 }
 
-func (h *UserHandler) UserFromToken(w http.ResponseWriter, req bunrouter.Request) error {
+func (h *UserHandler) Validate(w http.ResponseWriter, req bunrouter.Request) error {
 	token, err := app.GetValidTokenFromReq(w, req)
 	if err != nil {
 		return err

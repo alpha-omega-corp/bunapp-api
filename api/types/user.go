@@ -1,7 +1,7 @@
 package types
 
 import (
-	"github.com/alpha-omega-corp/bunapp-api/httputils"
+	"github.com/alpha-omega-corp/bunapp-api/app/httputils"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bun"
 	"golang.org/x/crypto/bcrypt"

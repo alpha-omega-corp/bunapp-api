@@ -13,4 +13,6 @@ db_init:
 db_reset:
 	go run cmd/main.go -env=dev db reset
 
+config:
+	cp app/config/test.yaml app/config/dev.yaml
 

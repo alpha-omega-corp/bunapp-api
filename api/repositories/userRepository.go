@@ -1,8 +1,8 @@
-package repository
+package repositories
 
 import (
 	"context"
-	"github.com/alpha-omega-corp/bunapp-api/types"
+	"github.com/alpha-omega-corp/bunapp-api/api/types"
 	"github.com/uptrace/bun"
 )
 

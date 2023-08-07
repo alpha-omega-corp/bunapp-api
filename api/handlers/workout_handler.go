@@ -1,24 +1,24 @@
-package httphandlers
+package handlers
 
 import (
 	"encoding/json"
+	"github.com/alpha-omega-corp/bunapp-api/api/types"
 	"github.com/alpha-omega-corp/bunapp-api/app"
-	"github.com/alpha-omega-corp/bunapp-api/types"
 	"github.com/uptrace/bunrouter"
 	"net/http"
 )
 
-type PlanHandler struct {
+type WorkoutHandler struct {
 	app *app.App
 }
 
-func NewPlanHandler(app *app.App) *PlanHandler {
-	return &PlanHandler{
+func NewWorkoutHandler(app *app.App) *WorkoutHandler {
+	return &WorkoutHandler{
 		app: app,
 	}
 }
 
-func (h *PlanHandler) Create(w http.ResponseWriter, req bunrouter.Request) error {
+func (h *WorkoutHandler) Create(w http.ResponseWriter, req bunrouter.Request) error {
 	var data types.CreatePlanRequest
 	if err := json.NewDecoder(req.Body).Decode(&data); err != nil {
 		return err

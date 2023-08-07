@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/alpha-omega-corp/bunapp-api/types"
+	"github.com/alpha-omega-corp/bunapp-api/api/types"
 	"io"
 	"net/http"
 	"os"

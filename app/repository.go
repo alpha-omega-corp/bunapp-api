@@ -1,12 +1,12 @@
 package app
 
 import (
-	"github.com/alpha-omega-corp/bunapp-api/repository"
+	"github.com/alpha-omega-corp/bunapp-api/api/repositories"
 	"github.com/uptrace/bun"
 )
 
 type RepoManager struct {
-	userRepo repository.IUserRepository
+	userRepo repositories.IUserRepository
 }
 
 func (app *App) initRepositories() {
@@ -15,10 +15,10 @@ func (app *App) initRepositories() {
 
 func NewRepoManager(db *bun.DB) *RepoManager {
 	return &RepoManager{
-		userRepo: repository.NewUserRepository(db),
+		userRepo: repositories.NewUserRepository(db),
 	}
 }
 
-func (r *RepoManager) User() repository.IUserRepository {
+func (r *RepoManager) User() repositories.IUserRepository {
 	return r.userRepo
 }

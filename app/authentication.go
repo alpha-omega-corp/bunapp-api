@@ -2,7 +2,7 @@ package app
 
 import (
 	"fmt"
-	"github.com/alpha-omega-corp/bunapp-api/httputils"
+	"github.com/alpha-omega-corp/bunapp-api/app/httputils"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bunrouter"
 	"net/http"
