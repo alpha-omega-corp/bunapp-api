@@ -1,5 +1,5 @@
 server:
-	go run cmd/main.go -env=dev serve
+	go run cmd/main.go -env=dev server start
 
 build:
 	go build -o bin/api cmd/main.go

@@ -1,4 +1,4 @@
-package handler
+package httphandlers
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 )
 
 func Bootstrap() {
-	app.OnStart("handler.init", func(ctx context.Context, app *app.App) error {
+	app.OnStart("httphandlers.init", func(ctx context.Context, app *app.App) error {
 		api := app.ApiRouter()
 		userHandler := NewUserHandler(app)
 

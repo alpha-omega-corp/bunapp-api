@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/alpha-omega-corp/bunapp-api/app"
-	"github.com/alpha-omega-corp/bunapp-api/handler"
+	"github.com/alpha-omega-corp/bunapp-api/httphandlers"
 	"github.com/alpha-omega-corp/bunapp-api/httputils"
 	"github.com/alpha-omega-corp/bunapp-api/types"
 	"github.com/uptrace/bun/migrate"
@@ -37,8 +37,8 @@ func main() {
 }
 
 var serverCommand = &cli.Command{
-	Name:  "serve",
-	Usage: "start http server",
+	Name:  "server",
+	Usage: "manage application server",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "addr",
@@ -46,37 +46,43 @@ var serverCommand = &cli.Command{
 			Usage: "serve address",
 		},
 	},
-	Action: func(c *cli.Context) error {
-		handler.Bootstrap()
-		ctx, appInstance, err := app.Start(c.Context, "api", c.String("env"))
+	Subcommands: []*cli.Command{
+		{
+			Name:  "start",
+			Usage: "start the http server",
+			Action: func(c *cli.Context) error {
+				httphandlers.Bootstrap()
+				ctx, appInstance, err := app.Start(c.Context, "bunapp-api", c.String("env"))
 
-		if err != nil {
-			return err
-		}
-		defer appInstance.Stop()
+				if err != nil {
+					return err
+				}
+				defer appInstance.Stop()
 
-		var handler http.Handler
-		handler = appInstance.Router()
-		handler = httputils.ExitOnPanicHandler{Next: handler}
+				var handler http.Handler
+				handler = appInstance.Router()
+				handler = httputils.ExitOnPanicHandler{Next: handler}
 
-		srv := &http.Server{
-			Addr:         c.String("addr"),
-			ReadTimeout:  60 * time.Second,
-			WriteTimeout: 60 * time.Second,
-			IdleTimeout:  60 * time.Second,
-			Handler:      handler,
-		}
+				srv := &http.Server{
+					Addr:         c.String("addr"),
+					ReadTimeout:  60 * time.Second,
+					WriteTimeout: 60 * time.Second,
+					IdleTimeout:  60 * time.Second,
+					Handler:      handler,
+				}
 
-		go func() {
-			if err := srv.ListenAndServe(); err != nil && !isServerClosed(err) {
-				log.Printf("ListenAndServe failed: %s", err)
-			}
-		}()
+				go func() {
+					if err := srv.ListenAndServe(); err != nil && !isServerClosed(err) {
+						log.Printf("ListenAndServe failed: %s", err)
+					}
+				}()
 
-		fmt.Printf("listening on http://%s\n", srv.Addr)
-		fmt.Println(app.WaitExitSignal())
+				fmt.Printf("listening on http://%s\n", srv.Addr)
+				fmt.Println(app.WaitExitSignal())
 
-		return srv.Shutdown(ctx)
+				return srv.Shutdown(ctx)
+			},
+		},
 	},
 }
 

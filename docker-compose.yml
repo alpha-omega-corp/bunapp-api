@@ -10,7 +10,7 @@ services:
     environment:
       - 'POSTGRESQL_USERNAME=root'
       - 'POSTGRESQL_PASSWORD=root'
-      - 'POSTGRESQL_DATABASE=bunapp'
+      - 'POSTGRESQL_DATABASE=bunapp-api-db'
 
 volumes:
   pgdata:

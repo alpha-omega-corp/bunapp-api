@@ -1,18 +1,145 @@
+# BUNAPP-API
 
-Bun :
+This repository serves as an example of a RESTful API written in `golang`
+
+## MODULES
+- [bunorm](https://github.com/uptrace/bun) for database connections
+- [bunrouter](https://github.com/uptrace/bunrouterbun) for http routing
+- [golang-jwt/v5](https://github.com/golang-jwt/jwt) for authentication
+- [urfavcli/v2](https://github.com/urfave/cli) for command line interface integration
 
 
-Config: `cp ./app/config/test.yaml ./app/config/dev.yaml`
+## SETUP ENVIRONMENT
 
-# CHAD-GPT API
+Install `golang` and `make` binaries.
+```bash
+sudo apt update && sudo apt upgrade
+sudo apt install golang makefile
+```
 
-## ENDPOINTS
+Pull the code to local directory `~/GolandProjects/bunapp-api`.
+```bash
+git clone https://github.com/alpha-omega-corp/bunapp-api.git ~/GolandProjects/bunapp-api
+```
+
+Open the project in `Goland` and install dependencies.
+```bash
+go mod download
+go mod tidy
+```
+
+Create a `dev` config file from the `test` config file in `app/config`.
+```bash
+cp ./app/config/test.yaml ./app/config/dev.yaml
+```
+
+Create a `dev` database from the `docker-compose` file.
+```bash
+make db_create
+```
+
+Create migrations table for `bun`.
+```bash
+make db_init
+```
+
+Run the database reset command once to create required tables.
+```bash
+make db_reset
+```
+
+Start the application using the `Makefile`.
+```bash
+make server
+```
+
+Or manually using `go run`.
+```bash
+go run cmd/main.go -env=dev server
+```
+
+
+## FEATURES
+
+### 1. Command line interface
+
+[Documentation](https://cli.urfave.org/v2/getting-started/) | [GitHub](https://github.com/urfave/cli)
+
+`main.go` is the application's entry point and contains the `cli` commands for starting the application and running database migrations.
+
+**Top levels commands:**
+```bash
+go run cmd/main.go -env=dev server
+go run cmd/main.go -env=dev db
+```
+
+**Database commands:**
+```bash
+go run cmd/main.go -env=dev db init
+go run cmd/main.go -env=dev db reset
+```
+
+**Server commands:**
+```bash
+go run cmd/main.go -env=dev server start
+```
+
+### 2. Bun application package
+
+[Documentation](https://bun.uptrace.dev/guide/starter-kit.html) | [GitHub](https://github.com/go-bun/bun-starter-kit)
+
+The `app` directory contains the code responsible for creating an `app *App` instance.
+
+1. Create a directory from the root of this project.
+
+2. Inside it create a file named `init.go` with the following content:
+
+```go
+package httphandlers
+
+import (
+  "context"
+  "github.com/alpha-omega-corp/bunapp-api/app"
+)
+
+func Bootstrap() {
+  app.OnStart("httphandlers.init", func (ctx context.Context, app *app.App) error {
+    //app.Router()
+    //app.ApiRouter()
+    //app.Database()
+    //app.Repositories()
+    //app.GptClient()
+    //app.PromptManager()
+  })
+}
+```
+<u>**Example**</u>: [httphandlers](https://github.com/alpha-omega-corp/bunapp-api/blob/production/httphandlers/init.go)
+
+The `callback` function allows you to access [`app *App`](https://github.com/alpha-omega-corp/bunapp-api/blob/production/app/app.go)'s context, properties and handlers.
+
+To start this new `httphandlers` application call the public `Bootstrap` function from the `cmd/main.go` file.
+
+```golang
+package main
+
+import (
+  "github.com/alpha-omega-corp/bunapp-api/app"
+  "github.com/alpha-omega-corp/bunapp-api/httphandlers"
+)
+
+func main() {
+    //...
+    Action: func(c *cli.Context) error {
+        httphandlers.Bootstrap()
+    } //...
+}
+```
+<u>**Example**</u>: [cmd/main.go](https://github.com/alpha-omega-corp/bunapp-api/blob/production/cmd/main.go)
 
 
 
-## LIBRARIES 
 
-- [golang-jwt](https://github.com/golang-jwt/jwt)
-- [bunrouter](https://github.com/uptrace/bunrouterbun)
-- [bunorm](https://github.com/uptrace/bun)
+
+
+
 

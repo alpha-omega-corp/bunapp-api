@@ -2,7 +2,7 @@ debug: true
 
 db:
   addr: localhost:5439
-  name: bunapp
+  name: bunapp-api-db
   user: root
   pass: root
 
