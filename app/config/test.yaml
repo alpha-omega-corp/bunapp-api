@@ -1,10 +1,10 @@
 debug: true
 
 db:
-  addr: localhost:5432
-  name:
-  user:
-  pass:
+  addr: localhost:5439
+  name: bunapp
+  user: root
+  pass: root
 
 gpt:
   host: https://api.openai.com/v1

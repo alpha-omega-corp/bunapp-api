@@ -1,7 +1,7 @@
 package app
 
 import (
-	"chadgpt-api/repository"
+	"github.com/alpha-omega-corp/bunapp-api/repository"
 	"github.com/uptrace/bun"
 )
 

@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"chadgpt-api/types"
 	"context"
+	"github.com/alpha-omega-corp/bunapp-api/types"
 	"github.com/uptrace/bun"
 )
 
@@ -59,14 +59,17 @@ func (ur *UserRepository) GetAll(ctx context.Context) ([]types.User, error) {
 }
 
 func (ur *UserRepository) CreateUser(u *types.UserRaw, ctx context.Context) (*types.User, error) {
-	var rawUser types.UserRaw
-	_, err := ur.db.NewInsert().Model(u).Exec(ctx, &rawUser)
-
+	_, err := ur.db.NewInsert().Model(u).Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return rawUser.ToUser(), nil
+	user, err := ur.GetByEmail(u.Email, ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (ur *UserRepository) DeleteUser(id int64, ctx context.Context) error {

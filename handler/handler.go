@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"chadgpt-api/app"
 	"context"
+	"github.com/alpha-omega-corp/bunapp-api/app"
 )
 
 func Bootstrap() {

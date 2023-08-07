@@ -1,8 +1,8 @@
 package app
 
 import (
-	"chadgpt-api/httputils"
 	"fmt"
+	"github.com/alpha-omega-corp/bunapp-api/httputils"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bunrouter"
 	"net/http"

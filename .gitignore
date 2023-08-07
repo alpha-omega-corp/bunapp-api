@@ -1,2 +1,3 @@
 .idea
-./app/config/dev.yaml
+app/config/dev.yaml
+bin

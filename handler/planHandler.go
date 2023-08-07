@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"chadgpt-api/app"
-	"chadgpt-api/types"
 	"encoding/json"
+	"github.com/alpha-omega-corp/bunapp-api/app"
+	"github.com/alpha-omega-corp/bunapp-api/types"
 	"github.com/uptrace/bunrouter"
 	"net/http"
 )

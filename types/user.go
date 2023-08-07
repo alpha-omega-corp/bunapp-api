@@ -1,7 +1,7 @@
 package types
 
 import (
-	"chadgpt-api/httputils"
+	"github.com/alpha-omega-corp/bunapp-api/httputils"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bun"
 	"golang.org/x/crypto/bcrypt"
@@ -24,7 +24,7 @@ type User struct {
 	LastName          string `json:"lastName"`
 	Age               int    `json:"age"`
 	Email             string `json:"email"`
-	EncryptedPassword string
+	EncryptedPassword string `json:"-"`
 }
 
 func (u *User) Verify(pw string) bool {

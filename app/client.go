@@ -2,9 +2,9 @@ package app
 
 import (
 	"bytes"
-	"chadgpt-api/types"
 	"encoding/json"
 	"fmt"
+	"github.com/alpha-omega-corp/bunapp-api/types"
 	"io"
 	"net/http"
 	"os"
@@ -29,10 +29,13 @@ type RoundTripper struct {
 }
 
 func (rt *RoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	_, err := fmt.Fprintf(rt.logger, "[%s] %s %s\n", time.Now().Format(time.ANSIC), req.Method, req.URL.String())
+	_, err := fmt.Fprintf(rt.logger, "[%s] %s %s\n",
+		time.Now().Format(time.ANSIC), req.Method, req.URL.String())
+
 	if err != nil {
 		return nil, err
 	}
+
 	return rt.next.RoundTrip(req)
 }
 

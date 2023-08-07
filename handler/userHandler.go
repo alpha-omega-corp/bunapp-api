@@ -1,11 +1,11 @@
 package handler
 
 import (
-	"chadgpt-api/app"
-	"chadgpt-api/repository"
-	"chadgpt-api/types"
 	"encoding/json"
 	"fmt"
+	"github.com/alpha-omega-corp/bunapp-api/app"
+	"github.com/alpha-omega-corp/bunapp-api/repository"
+	"github.com/alpha-omega-corp/bunapp-api/types"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bunrouter"
 	"golang.org/x/crypto/bcrypt"

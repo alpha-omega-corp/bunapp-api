@@ -1,11 +1,11 @@
 package main
 
 import (
-	"chadgpt-api/app"
-	"chadgpt-api/handler"
-	"chadgpt-api/httputils"
-	"chadgpt-api/types"
 	"fmt"
+	"github.com/alpha-omega-corp/bunapp-api/app"
+	"github.com/alpha-omega-corp/bunapp-api/handler"
+	"github.com/alpha-omega-corp/bunapp-api/httputils"
+	"github.com/alpha-omega-corp/bunapp-api/types"
 	"github.com/uptrace/bun/migrate"
 	"github.com/urfave/cli/v2"
 	"log"
@@ -100,7 +100,7 @@ func newDBCommand() *cli.Command {
 				},
 			},
 			{
-				Name:  "migrate",
+				Name:  "reset",
 				Usage: "migrate database",
 				Action: func(c *cli.Context) error {
 					ctx, appInstance, err := app.StartCLI(c)

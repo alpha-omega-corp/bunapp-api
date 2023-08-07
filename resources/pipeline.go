@@ -31,5 +31,4 @@ func Pipeline(nums []int) {
 	for n := range finalChan {
 		println(n)
 	}
-
 }
