@@ -21,7 +21,6 @@ func (app *App) initRouter() {
 		bunrouter.WithMiddleware(reqlog.NewMiddleware(
 			reqlog.WithEnabled(app.IsDebug()),
 			reqlog.WithVerbose(true),
-			reqlog.FromEnv(""),
 		)))
 
 	app.apiRouter = app.router.NewGroup("/api",

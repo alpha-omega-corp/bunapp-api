@@ -117,7 +117,7 @@ func Bootstrap() {
 
 The `callback` function allows you to access [`app *App`](https://github.com/alpha-omega-corp/bunapp-api/blob/production/app/app.go)'s context, properties and handlers.
 
-To start this new `httphandlers` application call the public `Bootstrap` function from the `cmd/main.go` file.
+To start this new `example` application call the public `Bootstrap` function from the `cmd/main.go` file.
 
 ```golang
 package main
@@ -126,7 +126,7 @@ func main() {
 	//...
     Action:
         func(c *cli.Context) error {
-            httphandlers.Bootstrap()
+            example.Bootstrap()
         } //...
 }
 
