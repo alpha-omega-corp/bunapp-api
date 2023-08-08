@@ -65,7 +65,8 @@ go run cmd/main.go -env=dev server
 
 [Documentation](https://cli.urfave.org/v2/getting-started/) | [GitHub](https://github.com/urfave/cli)
 
-`main.go` is the application's entry point and contains the `cli` commands for starting the application and running database migrations.
+
+`main.go` handles the application's `cli` commands.
 
 **Top levels commands:**
 ```bash
@@ -90,9 +91,9 @@ go run cmd/main.go -env=dev server start
 
 The `app` directory contains the code responsible for creating an `app *App` instance.
 
-1. Create a directory from the root of this project.
+1. Create a directory `example` inside `github.com/alpha-omega-corp/bunapp-api`
 
-2. Inside it create a file named `init.go` with the following content:
+2. From `example` create a `init.go` file with the following code:
 
 ```go
 package example
@@ -115,13 +116,17 @@ func Bootstrap() {
 ```
 <u>**Example**</u>: [api-app](https://github.com/alpha-omega-corp/bunapp-api/blob/production/api/init.go)
 
-The `callback` function allows you to access [`app *App`](https://github.com/alpha-omega-corp/bunapp-api/blob/production/app/app.go)'s context, properties and handlers.
+The `callback` function gives you access to the [`app *App`](https://github.com/alpha-omega-corp/bunapp-api/blob/production/app/app.go) instance
 
-To start this new `example` application call the public `Bootstrap` function from the `cmd/main.go` file.
+To start the `example` application call the public `Bootstrap` function from the `cmd/main.go` file.
 
 ```golang
 package main
-//...
+
+import (
+    "github.com/alpha-omega-corp/bunapp-api/example"
+)
+
 func main() {
 	//...
     Action:
