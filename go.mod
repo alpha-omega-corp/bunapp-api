@@ -13,7 +13,7 @@ require (
 	github.com/uptrace/bunrouter/extra/reqlog v1.0.20
 	github.com/urfave/cli/v2 v2.25.7
 	go4.org v0.0.0-20230225012048-214862532bf5
-	golang.org/x/crypto v0.12.0
+	golang.org/x/crypto v0.17.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -31,6 +31,6 @@ require (
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	go.opentelemetry.io/otel v1.13.0 // indirect
 	go.opentelemetry.io/otel/trace v1.13.0 // indirect
-	golang.org/x/sys v0.11.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 	mellium.im/sasl v0.3.1 // indirect
 )
